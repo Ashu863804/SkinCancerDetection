@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Project artifacts (do not commit weights or large outputs)
+saved_models/*.pt
+saved_models/*.pth
+saved_models/*.ckpt
+!saved_models/.gitkeep
+outputs/**
+!outputs/.gitkeep
+
+# Data (download locally or use Kaggle input)
+data/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+wandb/
+mlruns/
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/

@@ -1,0 +1,98 @@
+# HAM10000 Skin Lesion Classification — default configuration
+# Override paths via env SKIN_CANCER_ENV=kaggle|local or train_model(overrides={...})
+
+env: local  # local | kaggle
+
+project:
+  name: SkinCancerDetection
+  seed: 42
+  device: auto  # auto | cuda | cpu
+
+paths:
+  project_root: .
+  saved_models_dir: saved_models
+  outputs_dir: outputs
+  logs_dir: outputs/logs
+  reports_dir: outputs/reports
+  figures_dir: outputs/figures
+  gradcam_dir: outputs/gradcam
+  splits_dir: outputs/splits
+  debug_dir: outputs/debug
+
+data:
+  # Local paths (relative to project root)
+  metadata_csv: data/raw/HAM10000_metadata.csv
+  images_dirs:
+    - data/raw/HAM10000_images_part_1
+    - data/raw/HAM10000_images_part_2
+  # Kaggle paths (used when env=kaggle)
+  kaggle_metadata_csv: /kaggle/input/skin-cancer-mnist-ham10000/HAM10000_metadata.csv
+  kaggle_images_dirs:
+    - /kaggle/input/skin-cancer-mnist-ham10000/HAM10000_images_part_1
+    - /kaggle/input/skin-cancer-mnist-ham10000/HAM10000_images_part_2
+  image_extension: .jpg
+  train_ratio: 0.8
+  val_ratio: 0.1
+  test_ratio: 0.1
+  num_workers: 2
+  pin_memory: true
+  # Debug: limit samples for smoke tests (null = use all)
+  debug_max_samples: null
+
+augmentation:
+  image_size: 224
+  use_clahe: false
+  clahe_clip_limit: 2.0
+  clahe_tile_grid_size: 8
+  minority_boost: true
+  minority_classes:
+    - mel
+    - akiec
+    - bcc
+    - df
+    - vasc
+  minority_aug_probability: 0.85
+
+model:
+  name: efficientnet_v2_s
+  pretrained: true
+  num_classes: 7
+  dropout: 0.3
+  freeze_backbone_epochs: 0  # 0 = train full model from start
+  gradcam_target_layer: features
+
+training:
+  batch_size: 32
+  epochs: 30
+  learning_rate: 0.0003
+  weight_decay: 0.0001
+  optimizer: adamw
+  scheduler: cosine
+  warmup_epochs: 2
+  mixed_precision: true
+  label_smoothing: 0.0
+  use_weighted_sampler: true
+  use_class_weights: true
+  early_stopping_patience: 7
+  checkpoint_metric: val_macro_f1
+  checkpoint_mode: max
+  gradient_clip_norm: 1.0
+
+loss:
+  name: focal
+  focal_gamma: 2.0
+  focal_alpha: null  # null = compute from train class frequencies
+
+evaluation:
+  split: test
+  batch_size: 32
+  save_predictions: true
+  compute_roc_auc: true
+
+inference:
+  top_k: 3
+  checkpoint_path: saved_models/best.pt
+
+logging:
+  log_interval: 10
+  save_training_curves: true
